@@ -121,6 +121,13 @@ const DepartmentDetails = () => {
       }
     });
   };
+  const handleViewcore = () => {
+    navigate('/core-sub', {
+      state: {
+        department: department
+      }
+    });
+  };
 
   const handleBack = () => {
     navigate(-1);
@@ -468,14 +475,27 @@ const DepartmentDetails = () => {
                 exit={{ opacity: 0 }}
                 className="space-y-6"
               >
-                <h2 className="text-3xl font-bold text-gray-800 mb-2">Core Subjects</h2>
-                <p className="text-gray-600">
-                  Core curriculum subjects offered by the {department.dept_name} department
-                </p>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <h2 className="text-3xl font-bold text-gray-800 mb-2">CoreSubjects</h2>
+                    <p className="text-gray-600">
+                      Specialized coresubjects in the department {department.dept_name}
+                    </p>
+                  </div>
+                </div>
+
                 <div className="text-center py-12">
-                  <FiBook className="text-gray-300 text-6xl mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-600 mb-2">Core Subjects</h3>
-                  <p className="text-gray-500">Core subject management coming soon...</p>
+                  <FiGitBranch className="text-gray-300 text-6xl mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-600 mb-2">CoreSubject Management</h3>
+                  <p className="text-gray-500 mb-6">Explore and manage specialized subjects</p>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleViewcore}
+                    className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white px-8 py-4 rounded-2xl font-semibold transition-colors"
+                  >
+                    View All Coresubjects
+                  </motion.button>
                 </div>
               </motion.div>
             )}

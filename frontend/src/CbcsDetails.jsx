@@ -29,7 +29,8 @@ import {
   User,
   IdCard,
   MessageSquare,
-  AlertCircle
+  AlertCircle,
+  Globe
 } from "lucide-react";
 import { FaUniversity, FaChalkboardTeacher, FaRegChartBar } from "react-icons/fa";
 
@@ -118,7 +119,7 @@ const StatsCard = ({ icon: Icon, label, value, color = "blue", trend }) => (
 );
 
 // Subject Card Component
-const SubjectCard = ({ subject, index }) => (
+const SubjectCard = ({ subject, index, isElective = false }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -170,29 +171,30 @@ const SubjectCard = ({ subject, index }) => (
   </motion.div>
 );
 
-// Toggle Switch Component
-const ToggleSwitch = ({ enabled, onChange, label, enabledColor = "blue" }) => (
+// Toggle Switch Component - FIXED
+const ToggleSwitch = ({ enabled, onChange, label, enabledColor = "blue", loading = false }) => (
   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
     <span className="text-gray-700 font-medium">{label}</span>
     <button
       onClick={onChange}
+      disabled={loading}
       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
         enabled 
-          ? `bg-${enabledColor}-600` 
+          ? enabledColor === "green" ? 'bg-green-600' : 'bg-purple-600'
           : 'bg-gray-300'
-      }`}
+      } ${loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
     >
       <span
         className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
           enabled ? 'translate-x-6' : 'translate-x-1'
-        }`}
+        } ${loading ? 'opacity-70' : ''}`}
       />
     </button>
   </div>
 );
 
 // Student Row Component for Pending Students
-const StudentRow = ({ student, index }) => (
+const StudentRow = ({ student, index, isElective = false }) => (
   <motion.tr
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
@@ -205,12 +207,19 @@ const StudentRow = ({ student, index }) => (
           <User className="w-5 h-5 text-white" />
         </div>
         <div>
-          <div className="text-gray-800 font-semibold">{student.name}</div>
+          <div className="text-gray-800 font-semibold">
+            {isElective ? student.email?.split('@')[0] : student.name}
+          </div>
+          {isElective && (
+            <div className="text-gray-500 text-xs">{student.email}</div>
+          )}
         </div>
       </div>
     </td>
     <td className="py-4 px-4">
-      <div className="text-gray-700 font-mono text-sm">{student.regno}</div>
+      <div className="text-gray-700 font-mono text-sm">
+        {isElective ? student.regno : student.regno}
+      </div>
     </td>
     <td className="py-4 px-4">
       <div className="flex items-center gap-2">
@@ -242,7 +251,7 @@ const LoadingSkeleton = () => (
 );
 
 const CbcsDetails = () => {
-  const { id } = useParams();
+  const { id, type } = useParams(); // type can be 'core' or 'elective'
   const [cbcsData, setCbcsData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -251,11 +260,19 @@ const CbcsDetails = () => {
   const [loadingPending, setLoadingPending] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
+  // Determine if this is elective or core based on route parameter or URL
+  const isElective = type === 'elective' || window.location.pathname.includes('/elective/');
+
   useEffect(() => {
     const fetchCbcsDetails = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:5000/api/student_cbcs/${id}`);
+        
+        const baseUrl = isElective 
+          ? 'http://localhost:5000/api/elective-cbcs'
+          : 'http://localhost:5000/api/student_cbcs';
+        
+        const response = await axios.get(`${baseUrl}/${id}`);
         
         if (response.data.success) {
           setCbcsData(response.data.data);
@@ -271,64 +288,77 @@ const CbcsDetails = () => {
     };
 
     fetchCbcsDetails();
-  }, [id]);
+  }, [id, isElective]);
 
-  // Fetch pending students (JSON for UI)
-const fetchPendingStudents = async () => {
-  try {
-    setLoadingPending(true);
-    const response = await axios.get(
-      `http://localhost:5000/api/student_cbcs/${id}/pending?format=json`
-    );
+  // Fetch pending students
+  const fetchPendingStudents = async () => {
+    try {
+      setLoadingPending(true);
+      
+      const baseUrl = isElective 
+        ? 'http://localhost:5000/api/elective-cbcs'
+        : 'http://localhost:5000/api/student_cbcs';
+      
+      const response = await axios.get(
+        `${baseUrl}/${id}/pending?format=json`
+      );
 
-    if (response.data.success) {
-      setPendingStudents(response.data.data);
-      setShowPendingStudents(true);
-    } else {
-      throw new Error('Failed to fetch pending students');
+      if (response.data.success) {
+        setPendingStudents(response.data.data);
+        setShowPendingStudents(true);
+      } else {
+        throw new Error('Failed to fetch pending students');
+      }
+    } catch (err) {
+      console.error('Error fetching pending students:', err);
+      alert('Error fetching pending students');
+    } finally {
+      setLoadingPending(false);
     }
-  } catch (err) {
-    console.error('Error fetching pending students:', err);
-    alert('Error fetching pending students');
-  } finally {
-    setLoadingPending(false);
-  }
-};
+  };
 
-// Download pending students as Excel
-const downloadPendingStudentsExcel = async () => {
-  try {
-    const response = await axios.get(
-      `http://localhost:5000/api/student_cbcs/${id}/pending?format=excel`,
-      { responseType: 'blob' }
-    );
+  // Download pending students as Excel
+  const downloadPendingStudentsExcel = async () => {
+    try {
+      const baseUrl = isElective 
+        ? 'http://localhost:5000/api/elective-cbcs'
+        : 'http://localhost:5000/api/student_cbcs';
+      
+      const response = await axios.get(
+        `${baseUrl}/${id}/pending?format=excel`,
+        { responseType: 'blob' }
+      );
 
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `pending_students_${cbcsData.cbcs_id}.xlsx`);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
-  } catch (err) {
-    console.error('Error downloading Excel:', err);
-    alert('Error downloading Excel file');
-  }
-};
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `pending_students_${cbcsData.cbcs_id}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error downloading Excel:', err);
+      alert('Error downloading Excel file');
+    }
+  };
 
-
+  // FIXED: Update CBCS status
   const updateCbcsStatus = async (enabled) => {
     try {
       setUpdatingStatus(true);
-      const response = await axios.put(`http://localhost:5000/api/student_cbcs/${id}/updateCbcs`, {
+      const baseUrl = isElective 
+        ? 'http://localhost:5000/api/elective-cbcs'
+        : 'http://localhost:5000/api/student_cbcs';
+      
+      const response = await axios.put(`${baseUrl}/${id}/updateCbcs`, {
         enabled: enabled
       });
       
       if (response.data.success) {
         setCbcsData(prev => ({
           ...prev,
-          cbcs_enabled: enabled
+          cbcs: enabled // Use 'cbcs' field instead of 'cbcs_enabled'
         }));
       } else {
         throw new Error('Failed to update CBCS status');
@@ -341,17 +371,22 @@ const downloadPendingStudentsExcel = async () => {
     }
   };
 
+  // FIXED: Update Feedback status
   const updateFeedbackStatus = async (enabled) => {
     try {
       setUpdatingStatus(true);
-      const response = await axios.put(`http://localhost:5000/api/student_cbcs/${id}/updateFeedback`, {
+      const baseUrl = isElective 
+        ? 'http://localhost:5000/api/elective-cbcs'
+        : 'http://localhost:5000/api/student_cbcs';
+      
+      const response = await axios.put(`${baseUrl}/${id}/updateFeedback`, {
         enabled: enabled
       });
       
       if (response.data.success) {
         setCbcsData(prev => ({
           ...prev,
-          feedback_enabled: enabled
+          feedback: enabled // Use 'feedback' field instead of 'feedback_enabled'
         }));
       } else {
         throw new Error('Failed to update feedback status');
@@ -368,8 +403,14 @@ const downloadPendingStudentsExcel = async () => {
   if (error) return <div>Error: {error}</div>;
   if (!cbcsData) return <div>No data found</div>;
 
-  const completionRate = cbcsData.total_students > 0 
-    ? (cbcsData.submissions.length / cbcsData.total_students) * 100 
+  // Calculate completion rate - different field names for elective
+  const totalStudents = cbcsData.total_students || 0;
+  const submissionsCount = isElective 
+    ? (cbcsData.submissions || []).length 
+    : cbcsData.submissions.length;
+  
+  const completionRate = totalStudents > 0 
+    ? (submissionsCount / totalStudents) * 100 
     : 0;
 
   const totalStaff = cbcsData.subjects.reduce((total, subject) => total + subject.staffs.length, 0);
@@ -378,7 +419,14 @@ const downloadPendingStudentsExcel = async () => {
     0
   );
 
-  const pendingStudentsCount = cbcsData.total_students - cbcsData.submissions.length;
+  const pendingStudentsCount = totalStudents - submissionsCount;
+
+  // Get department/domain name
+  const departmentName = isElective ? cbcsData.domain : cbcsData.department;
+
+  // FIXED: Use correct field names from backend
+  const isCbcsEnabled = cbcsData.cbcs; // Use 'cbcs' instead of 'cbcs_enabled'
+  const isFeedbackEnabled = cbcsData.feedback; // Use 'feedback' instead of 'feedback_enabled'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100 py-8 px-4">
@@ -401,16 +449,41 @@ const downloadPendingStudentsExcel = async () => {
               scale: [1, 1.05, 1]
             }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="w-20 h-20 bg-gradient-to-r from-blue-500 to-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg"
+            className={`w-20 h-20 bg-gradient-to-r rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg ${
+              isElective ? 'from-purple-500 to-purple-600' : 'from-blue-500 to-blue-600'
+            }`}
           >
-            <FaUniversity className="w-10 h-10 text-white" />
+            {isElective ? (
+              <Globe className="w-10 h-10 text-white" />
+            ) : (
+              <FaUniversity className="w-10 h-10 text-white" />
+            )}
           </motion.div>
           <h1 className="text-5xl font-bold text-gray-800 mb-4">
-            CBCS Details
+            {isElective ? 'Elective CBCS' : 'Core CBCS'} Details
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Comprehensive overview of the Choice Based Credit System
+            Comprehensive overview of the {isElective ? 'Elective' : 'Core'} Choice Based Credit System
           </p>
+          <div className="mt-4">
+            <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${
+              isElective 
+                ? 'bg-purple-100 text-purple-700 border border-purple-200' 
+                : 'bg-blue-100 text-blue-700 border border-blue-200'
+            }`}>
+              {isElective ? (
+                <>
+                  <Globe className="w-4 h-4" />
+                  <span className="font-semibold">Elective Program</span>
+                </>
+              ) : (
+                <>
+                  <FaUniversity className="w-4 h-4" />
+                  <span className="font-semibold">Core Program</span>
+                </>
+              )}
+            </span>
+          </div>
         </motion.div>
 
         {/* Main Content Grid */}
@@ -424,13 +497,15 @@ const downloadPendingStudentsExcel = async () => {
                 <ProgressRing progress={completionRate} />
               </div>
               <div className="text-gray-600 text-sm">
-                {cbcsData.submissions.length} of {cbcsData.total_students} students completed
+                {submissionsCount} of {totalStudents} students completed
               </div>
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${completionRate}%` }}
                 transition={{ duration: 1, delay: 0.5 }}
-                className="h-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mt-2"
+                className={`h-2 bg-gradient-to-r rounded-full mt-2 ${
+                  isElective ? 'from-purple-500 to-purple-600' : 'from-blue-500 to-blue-600'
+                }`}
               />
             </ProfessionalCard>
 
@@ -438,13 +513,13 @@ const downloadPendingStudentsExcel = async () => {
             <StatsCard 
               icon={Users} 
               label="Total Students" 
-              value={cbcsData.total_students} 
-              color="blue" 
+              value={totalStudents} 
+              color={isElective ? "purple" : "blue"} 
             />
             <StatsCard 
               icon={UserCheck} 
               label="Completed" 
-              value={cbcsData.submissions.length} 
+              value={submissionsCount} 
               color="green" 
               trend={completionRate}
             />
@@ -452,16 +527,16 @@ const downloadPendingStudentsExcel = async () => {
               icon={FaChalkboardTeacher} 
               label="Teaching Staff" 
               value={totalStaff} 
-              color="blue" 
+              color={isElective ? "purple" : "blue"} 
             />
             <StatsCard 
               icon={Target} 
               label="Available Slots" 
               value={totalStudentSlots} 
-              color="blue" 
+              color={isElective ? "purple" : "blue"} 
             />
 
-            {/* 🆕 Admin Controls Section */}
+            {/* Admin Controls Section */}
             <ProfessionalCard className="p-6">
               <h3 className="text-gray-800 font-semibold mb-4 flex items-center gap-2">
                 <Shield className="w-5 h-5 text-blue-600" />
@@ -469,18 +544,21 @@ const downloadPendingStudentsExcel = async () => {
               </h3>
               
               <div className="space-y-4">
+                {/* FIXED: Use correct field names and pass loading state */}
                 <ToggleSwitch
-                  enabled={cbcsData.cbcs_enabled}
-                  onChange={() => updateCbcsStatus(!cbcsData.cbcs_enabled)}
+                  enabled={isCbcsEnabled}
+                  onChange={() => updateCbcsStatus(!isCbcsEnabled)}
                   label="CBCS Filling"
                   enabledColor="green"
+                  loading={updatingStatus}
                 />
                 
                 <ToggleSwitch
-                  enabled={cbcsData.feedback_enabled}
-                  onChange={() => updateFeedbackStatus(!cbcsData.feedback_enabled)}
+                  enabled={isFeedbackEnabled}
+                  onChange={() => updateFeedbackStatus(!isFeedbackEnabled)}
                   label="Feedback System"
                   enabledColor="purple"
+                  loading={updatingStatus}
                 />
 
                 {/* Pending Students Actions */}
@@ -488,7 +566,11 @@ const downloadPendingStudentsExcel = async () => {
                   <motion.button
                     onClick={fetchPendingStudents}
                     disabled={loadingPending}
-                    className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                      isElective 
+                        ? 'bg-purple-500 hover:bg-purple-600 text-white' 
+                        : 'bg-orange-500 hover:bg-orange-600 text-white'
+                    }`}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
@@ -498,7 +580,11 @@ const downloadPendingStudentsExcel = async () => {
 
                   <motion.button
                     onClick={downloadPendingStudentsExcel}
-                    className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200"
+                    className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold transition-all duration-200 ${
+                      isElective 
+                        ? 'bg-green-500 hover:bg-green-600 text-white' 
+                        : 'bg-green-500 hover:bg-green-600 text-white'
+                    }`}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
@@ -521,8 +607,10 @@ const downloadPendingStudentsExcel = async () => {
                   transition={{ delay: 0.3 }}
                   className="text-center"
                 >
-                  <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                    <Award className="w-6 h-6 text-blue-600" />
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3 ${
+                    isElective ? 'bg-purple-100' : 'bg-blue-100'
+                  }`}>
+                    <Award className={`w-6 h-6 ${isElective ? 'text-purple-600' : 'text-blue-600'}`} />
                   </div>
                   <div className="text-gray-800 font-bold text-lg">{cbcsData.cbcs_id}</div>
                   <div className="text-gray-600 text-sm">CBCS ID</div>
@@ -534,8 +622,10 @@ const downloadPendingStudentsExcel = async () => {
                   transition={{ delay: 0.4 }}
                   className="text-center"
                 >
-                  <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                    <Calendar className="w-6 h-6 text-blue-600" />
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3 ${
+                    isElective ? 'bg-purple-100' : 'bg-blue-100'
+                  }`}>
+                    <Calendar className={`w-6 h-6 ${isElective ? 'text-purple-600' : 'text-blue-600'}`} />
                   </div>
                   <div className="text-gray-800 font-bold text-lg">{cbcsData.batch}</div>
                   <div className="text-gray-600 text-sm">Batch</div>
@@ -547,8 +637,10 @@ const downloadPendingStudentsExcel = async () => {
                   transition={{ delay: 0.5 }}
                   className="text-center"
                 >
-                  <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                    <GraduationCap className="w-6 h-6 text-blue-600" />
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3 ${
+                    isElective ? 'bg-purple-100' : 'bg-blue-100'
+                  }`}>
+                    <GraduationCap className={`w-6 h-6 ${isElective ? 'text-purple-600' : 'text-blue-600'}`} />
                   </div>
                   <div className="text-gray-800 font-bold text-lg">Semester {cbcsData.semester}</div>
                   <div className="text-gray-600 text-sm">Semester</div>
@@ -560,13 +652,17 @@ const downloadPendingStudentsExcel = async () => {
                   transition={{ delay: 0.6 }}
                   className="text-center"
                 >
-                  <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                    <Building className="w-6 h-6 text-blue-600" />
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3 ${
+                    isElective ? 'bg-purple-100' : 'bg-blue-100'
+                  }`}>
+                    <Building className={`w-6 h-6 ${isElective ? 'text-purple-600' : 'text-blue-600'}`} />
                   </div>
-                  <div className="text-gray-800 font-bold text-lg truncate" title={cbcsData.department}>
-                    {cbcsData.department}
+                  <div className="text-gray-800 font-bold text-lg truncate" title={departmentName}>
+                    {departmentName}
                   </div>
-                  <div className="text-gray-600 text-sm">Department</div>
+                  <div className="text-gray-600 text-sm">
+                    {isElective ? 'Domain' : 'Department'}
+                  </div>
                 </motion.div>
               </div>
 
@@ -595,18 +691,18 @@ const downloadPendingStudentsExcel = async () => {
                   )}
                 </motion.div>
 
-                {/* 🆕 System Status Badges */}
+                {/* FIXED: System Status Badges - use correct field names */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.75 }}
                   className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${
-                    cbcsData.cbcs_enabled
+                    isCbcsEnabled
                       ? 'bg-green-100 text-green-700 border border-green-200' 
                       : 'bg-red-100 text-red-700 border border-red-200'
                   }`}
                 >
-                  {cbcsData.cbcs_enabled ? (
+                  {isCbcsEnabled ? (
                     <>
                       <ToggleRight className="w-4 h-4" />
                       <span className="font-semibold">CBCS Enabled</span>
@@ -624,20 +720,20 @@ const downloadPendingStudentsExcel = async () => {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.8 }}
                   className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${
-                    cbcsData.feedback_enabled
+                    isFeedbackEnabled
                       ? 'bg-purple-100 text-purple-700 border border-purple-200' 
                       : 'bg-gray-100 text-gray-700 border border-gray-200'
                   }`}
                 >
                   <MessageSquare className="w-4 h-4" />
                   <span className="font-semibold">
-                    Feedback {cbcsData.feedback_enabled ? 'Enabled' : 'Disabled'}
+                    Feedback {isFeedbackEnabled ? 'Enabled' : 'Disabled'}
                   </span>
                 </motion.div>
               </div>
             </ProfessionalCard>
 
-            {/* 🆕 Pending Students Section */}
+            {/* Pending Students Section */}
             {showPendingStudents && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -647,7 +743,9 @@ const downloadPendingStudentsExcel = async () => {
                 <ProfessionalCard className="p-6">
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center">
+                      <div className={`w-12 h-12 bg-gradient-to-r rounded-2xl flex items-center justify-center ${
+                        isElective ? 'from-purple-500 to-purple-600' : 'from-orange-500 to-orange-600'
+                      }`}>
                         <AlertCircle className="w-6 h-6 text-white" />
                       </div>
                       <div>
@@ -677,7 +775,12 @@ const downloadPendingStudentsExcel = async () => {
                       <tbody>
                         <AnimatePresence>
                           {pendingStudents.map((student, index) => (
-                            <StudentRow key={student.student_id} student={student} index={index} />
+                            <StudentRow 
+                              key={isElective ? student.regno : student.student_id} 
+                              student={student} 
+                              index={index} 
+                              isElective={isElective}
+                            />
                           ))}
                         </AnimatePresence>
                       </tbody>
@@ -695,7 +798,9 @@ const downloadPendingStudentsExcel = async () => {
                 transition={{ delay: 0.8 }}
                 className="flex items-center gap-3 mb-6"
               >
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center">
+                <div className={`w-10 h-10 bg-gradient-to-r rounded-2xl flex items-center justify-center ${
+                  isElective ? 'from-purple-500 to-purple-600' : 'from-blue-500 to-blue-600'
+                }`}>
                   <BookOpen className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -711,6 +816,7 @@ const downloadPendingStudentsExcel = async () => {
                       key={subject.subject_id} 
                       subject={subject} 
                       index={index} 
+                      isElective={isElective}
                     />
                   ))}
                 </AnimatePresence>
@@ -724,7 +830,7 @@ const downloadPendingStudentsExcel = async () => {
                   <FileText className="w-8 h-8 text-blue-600 mx-auto mb-2" />
                   <div className="text-gray-800 font-semibold">Excel File</div>
                   <div className="text-gray-600 text-sm">
-                    {cbcsData.student_excel_file ? 'Uploaded' : 'Not Uploaded'}
+                    {cbcsData.student_excel_file || cbcsData.allocation_excel_path ? 'Uploaded' : 'Not Uploaded'}
                   </div>
                 </div>
                 <div className="text-center">

@@ -21,9 +21,7 @@ router.get("/", getAllElectiveCbcs);
 router.get("/:id", getElectiveCbcsById);
 
 router.post("/stu/:id", submitElectiveStudentCbcs);
-
 router.delete("/:cbcs_id", verifyToken, deleteElectiveCbcs);
-
 // 🆕 Update CBCS status (true/false)
 router.put("/:cbcs_id/updateCbcs", updateCbcsStatus);
 // 🆕 Update Feedback status (true/false)

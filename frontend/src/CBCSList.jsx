@@ -11,31 +11,37 @@ import {
   FiFileText,
   FiArrowRight,
   FiFilter,
-  FiHome
+  FiHome,
+  FiLayers
 } from 'react-icons/fi';
 
-const CBCSList = ({ department = null }) => {
+const CBCSList = ({ department = null, cbcsType = 'core' }) => {
   const [cbcsList, setCbcsList] = useState([]);
   const [filteredCbcsList, setFilteredCbcsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
+  const [activeCbcsType, setActiveCbcsType] = useState(cbcsType); // 'core' or 'elective'
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchCBCSList();
-  }, []);
+  }, [activeCbcsType]);
 
   useEffect(() => {
-    // Apply filters whenever search term, active filter, or department changes
+    // Apply filters whenever search term, active filter, department, or cbcs type changes
     applyFilters();
-  }, [searchTerm, activeFilter, department, cbcsList]);
+  }, [searchTerm, activeFilter, department, cbcsList, activeCbcsType]);
 
   const fetchCBCSList = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/student_cbcs');
+      const apiUrl = activeCbcsType === 'elective' 
+        ? 'http://localhost:5000/api/elective-cbcs'
+        : 'http://localhost:5000/api/student_cbcs';
+      
+      const response = await fetch(apiUrl);
       if (!response.ok) {
         throw new Error('Failed to fetch CBCS data');
       }
@@ -67,13 +73,24 @@ const CBCSList = ({ department = null }) => {
     let filtered = cbcsList.filter(cbcs => {
       // Department filter - if department prop is provided, filter by it
       const matchesDepartment = !department || 
-        cbcs.department?.toLowerCase() === department.toLowerCase();
+        cbcs.department?.toLowerCase() === department.toLowerCase() ||
+        (activeCbcsType === 'elective' && cbcs.domain?.toLowerCase() === department.toLowerCase());
       
-      // Search filter
-      const matchesSearch = 
-        cbcs.cbcs_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cbcs.department?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cbcs.batch?.toLowerCase().includes(searchTerm.toLowerCase());
+      // Search filter - different fields for core vs elective
+      const searchLower = searchTerm.toLowerCase();
+      let matchesSearch = false;
+      
+      if (activeCbcsType === 'elective') {
+        matchesSearch = 
+          cbcs.cbcs_id?.toLowerCase().includes(searchLower) ||
+          cbcs.domain?.toLowerCase().includes(searchLower) ||
+          cbcs.batch?.toLowerCase().includes(searchLower);
+      } else {
+        matchesSearch = 
+          cbcs.cbcs_id?.toLowerCase().includes(searchLower) ||
+          cbcs.department?.toLowerCase().includes(searchLower) ||
+          cbcs.batch?.toLowerCase().includes(searchLower);
+      }
       
       // Active filter
       const matchesFilter = 
@@ -88,15 +105,21 @@ const CBCSList = ({ department = null }) => {
   };
 
   const handleViewDetails = (id) => {
-    navigate(`/cbcsdetails/${id}`);
+    if (activeCbcsType === 'elective') {
+      navigate(`/cbcsdetails/${id}/elective`);
+    } else {
+      navigate(`/cbcsdetails/${id}/core`);
+    }
   };
 
   const handleViewAllDepartments = () => {
-    // Navigate to the general CBCS page or reset department filter
-    if (department) {
-      // If you want to navigate to a general page
-      navigate('/cbcs'); // or whatever your general route is
-    }
+    navigate('/cbcs');
+  };
+
+  const handleCbcsTypeChange = (type) => {
+    setActiveCbcsType(type);
+    setSearchTerm('');
+    setActiveFilter('all');
   };
 
   // Animation variants
@@ -123,13 +146,26 @@ const CBCSList = ({ department = null }) => {
   };
 
   // Calculate stats based on current view
-  const currentList = department ? cbcsList.filter(cbcs => 
-    cbcs.department?.toLowerCase() === department.toLowerCase()
-  ) : cbcsList;
+  const currentList = department ? cbcsList.filter(cbcs => {
+    if (activeCbcsType === 'elective') {
+      return cbcs.domain?.toLowerCase() === department.toLowerCase();
+    } else {
+      return cbcs.department?.toLowerCase() === department.toLowerCase();
+    }
+  }) : cbcsList;
 
   const totalCBCS = currentList.length;
   const activeSemesters = new Set(currentList.map(c => c.semester)).size;
-  const departmentsCount = department ? 1 : new Set(currentList.map(c => c.department)).size;
+  
+  // For departments count, use department for core and domain for elective
+  const departmentsCount = department ? 1 : new Set(currentList.map(c => 
+    activeCbcsType === 'elective' ? c.domain : c.department
+  )).size;
+
+  // Get total students (different field for elective)
+  const totalStudents = currentList.reduce((sum, cbcs) => {
+    return sum + (cbcs.total_students || 0);
+  }, 0);
 
   if (loading) {
     return (
@@ -145,7 +181,9 @@ const CBCSList = ({ department = null }) => {
             transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
             className="mb-6 mx-auto w-16 h-16 rounded-full border-4 border-blue-500 border-t-transparent"
           ></motion.div>
-          <p className="text-xl font-semibold" style={{ color: '#3A6D8C' }}>Loading CBCS Data</p>
+          <p className="text-xl font-semibold" style={{ color: '#3A6D8C' }}>
+            Loading {activeCbcsType === 'elective' ? 'Elective' : 'Core'} CBCS Data
+          </p>
           <p className="text-gray-500 mt-2">Please wait while we fetch the latest information</p>
         </div>
       </motion.div>
@@ -193,7 +231,10 @@ const CBCSList = ({ department = null }) => {
           <div>
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-3xl font-bold" style={{ color: '#3A6D8C' }}>
-                {department ? `${department} CBCS` : 'All CBCS Programs'}
+                {department 
+                  ? `${department} ${activeCbcsType === 'elective' ? 'Elective' : 'Core'} CBCS`
+                  : `All ${activeCbcsType === 'elective' ? 'Elective' : 'Core'} CBCS Programs`
+                }
               </h1>
               {department && (
                 <motion.button
@@ -209,26 +250,50 @@ const CBCSList = ({ department = null }) => {
             </div>
             <p className="text-gray-600">
               {department 
-                ? `Managing CBCS programs for ${department} department`
-                : 'Manage and view all Choice Based Credit Systems'
+                ? `Managing ${activeCbcsType === 'elective' ? 'elective' : 'core'} CBCS programs for ${department}`
+                : `Manage and view all ${activeCbcsType === 'elective' ? 'elective' : 'core'} Choice Based Credit Systems`
               }
             </p>
           </div>
           
-          <motion.button
-            whileHover={{ scale: 1.05, boxShadow: "0 5px 15px rgba(58, 109, 140, 0.3)" }}
-            whileTap={{ scale: 0.95 }}
-            onClick={fetchCBCSList}
-            className="px-5 py-2.5 rounded-xl flex items-center gap-2 text-white font-semibold shadow-lg"
-            style={{ backgroundColor: '#3A6D8C' }}
-          >
-            <FiRefreshCw /> Refresh Data
-          </motion.button>
+          <div className="flex gap-3">
+            {/* CBCS Type Toggle */}
+            <div className="flex bg-gray-100 rounded-xl p-1">
+              {['core', 'elective'].map((type) => (
+                <motion.button
+                  key={type}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleCbcsTypeChange(type)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-all ${
+                    activeCbcsType === type 
+                      ? 'text-white shadow-lg' 
+                      : 'text-gray-600'
+                  }`}
+                  style={{ 
+                    backgroundColor: activeCbcsType === type ? '#3A6D8C' : 'transparent' 
+                  }}
+                >
+                  {type}
+                </motion.button>
+              ))}
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.05, boxShadow: "0 5px 15px rgba(58, 109, 140, 0.3)" }}
+              whileTap={{ scale: 0.95 }}
+              onClick={fetchCBCSList}
+              className="px-5 py-2.5 rounded-xl flex items-center gap-2 text-white font-semibold shadow-lg"
+              style={{ backgroundColor: '#3A6D8C' }}
+            >
+              <FiRefreshCw /> Refresh Data
+            </motion.button>
+          </div>
         </div>
 
         {/* Stats Cards */}
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"
+          className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
@@ -275,12 +340,28 @@ const CBCSList = ({ department = null }) => {
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-sm text-gray-500">
-                  {department ? 'Current Department' : 'Departments'}
+                  {department ? 'Current Department' : 'Departments/Domains'}
                 </p>
                 <h3 className="text-2xl font-bold" style={{ color: '#FFD60A' }}>{departmentsCount}</h3>
               </div>
               <div className="p-3 rounded-full" style={{ backgroundColor: 'rgba(255, 214, 10, 0.1)' }}>
                 <FiUsers className="text-xl" style={{ color: '#FFD60A' }} />
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div 
+            variants={itemVariants}
+            className="bg-white rounded-2xl p-5 shadow-lg border-l-4"
+            style={{ borderLeftColor: '#FF6B6B' }}
+          >
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm text-gray-500">Total Students</p>
+                <h3 className="text-2xl font-bold" style={{ color: '#FF6B6B' }}>{totalStudents}</h3>
+              </div>
+              <div className="p-3 rounded-full" style={{ backgroundColor: 'rgba(255, 107, 107, 0.1)' }}>
+                <FiLayers className="text-xl" style={{ color: '#FF6B6B' }} />
               </div>
             </div>
           </motion.div>
@@ -302,8 +383,8 @@ const CBCSList = ({ department = null }) => {
                 type="text"
                 placeholder={
                   department 
-                    ? `Search ${department} CBCS by ID or batch...`
-                    : "Search by ID, department, or batch..."
+                    ? `Search ${department} ${activeCbcsType === 'elective' ? 'elective' : 'core'} CBCS by ID, ${activeCbcsType === 'elective' ? 'domain' : 'department'}, or batch...`
+                    : `Search by ID, ${activeCbcsType === 'elective' ? 'domain' : 'department'}, or batch...`
                 }
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -354,7 +435,10 @@ const CBCSList = ({ department = null }) => {
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold flex items-center gap-2" style={{ color: '#3A6D8C' }}>
               <FiBook /> 
-              {department ? `${department} CBCS Programs` : 'All CBCS Programs'}
+              {department 
+                ? `${department} ${activeCbcsType === 'elective' ? 'Elective' : 'Core'} CBCS Programs`
+                : `All ${activeCbcsType === 'elective' ? 'Elective' : 'Core'} CBCS Programs`
+              }
               <span className="text-sm font-normal text-gray-500 ml-2">
                 ({filteredCbcsList.length} of {currentList.length})
               </span>
@@ -367,7 +451,10 @@ const CBCSList = ({ department = null }) => {
                 <FiSearch className="text-gray-400 text-3xl" />
               </div>
               <h3 className="text-lg font-medium text-gray-600 mb-2">
-                {department ? `No CBCS programs found for ${department}` : 'No CBCS programs found'}
+                {department 
+                  ? `No ${activeCbcsType === 'elective' ? 'elective' : 'core'} CBCS programs found for ${department}`
+                  : `No ${activeCbcsType === 'elective' ? 'elective' : 'core'} CBCS programs found`
+                }
               </h3>
               <p className="text-gray-500">
                 {searchTerm ? 'Try adjusting your search query' : 'No CBCS data available yet'}
@@ -380,10 +467,15 @@ const CBCSList = ({ department = null }) => {
                   <tr className="border-b-2 border-gray-200">
                     <th className="text-left py-4 px-4 font-semibold" style={{ color: '#3A6D8C' }}>CBCS ID</th>
                     {!department && (
-                      <th className="text-left py-4 px-4 font-semibold" style={{ color: '#3A6D8C' }}>Department</th>
+                      <th className="text-left py-4 px-4 font-semibold" style={{ color: '#3A6D8C' }}>
+                        {activeCbcsType === 'elective' ? 'Domain' : 'Department'}
+                      </th>
                     )}
                     <th className="text-left py-4 px-4 font-semibold" style={{ color: '#3A6D8C' }}>Batch</th>
                     <th className="text-left py-4 px-4 font-semibold" style={{ color: '#3A6D8C' }}>Semester</th>
+                    {activeCbcsType === 'elective' && (
+                      <th className="text-left py-4 px-4 font-semibold" style={{ color: '#3A6D8C' }}>Students</th>
+                    )}
                     <th className="text-left py-4 px-4 font-semibold" style={{ color: '#3A6D8C' }}>Actions</th>
                   </tr>
                 </thead>
@@ -402,7 +494,10 @@ const CBCSList = ({ department = null }) => {
                         <td className="py-4 px-4">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-md" style={{ backgroundColor: '#3A6D8C' }}>
-                              {cbcs.department?.charAt(0) || 'C'}
+                              {activeCbcsType === 'elective' 
+                                ? cbcs.domain?.charAt(0) || 'E'
+                                : cbcs.department?.charAt(0) || 'C'
+                              }
                             </div>
                             <div>
                               <div className="font-semibold" style={{ color: '#3A6D8C' }}>
@@ -416,7 +511,9 @@ const CBCSList = ({ department = null }) => {
                         </td>
                         {!department && (
                           <td className="py-4 px-4">
-                            <div className="font-medium text-gray-800">{cbcs.department}</div>
+                            <div className="font-medium text-gray-800">
+                              {activeCbcsType === 'elective' ? cbcs.domain : cbcs.department}
+                            </div>
                           </td>
                         )}
                         <td className="py-4 px-4">
@@ -427,6 +524,13 @@ const CBCSList = ({ department = null }) => {
                             Semester {cbcs.semester}
                           </div>
                         </td>
+                        {activeCbcsType === 'elective' && (
+                          <td className="py-4 px-4">
+                            <div className="font-medium text-gray-800">
+                              {cbcs.total_students || 0} students
+                            </div>
+                          </td>
+                        )}
                         <td className="py-4 px-4">
                           <motion.button
                             whileHover={{ scale: 1.05, boxShadow: "0 5px 15px rgba(58, 109, 140, 0.3)" }}

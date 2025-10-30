@@ -46,7 +46,7 @@ function App()
         <Route path="/departments/:dept_id" element={<DepartmentDetails />} />
         <Route path="/staffdetails/:staffId" element={<StaffDetails />} />
         <Route path="/staff-create" element={<CreateStaff />} />
-        <Route path="/cbcsdetails/:id" element={<CbcsDetails />} />
+        <Route path="/cbcsdetails/:id/:type" element={<CbcsDetails />} />
         <Route path="/domaindetails/:domain_id" element={<DomainDetails />} />
         <Route path="/domainlist" element={<DomainList />} />
         <Route path="/create-domain" element={<CreateDomain />} />

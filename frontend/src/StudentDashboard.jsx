@@ -30,7 +30,7 @@ const StudentDashboard = () => {
         // Replace with actual API call
         setTimeout(() => {
           setStudentData({
-            name: "John Doe",
+            name: regno,
             regno: regno,
             department: "Computer Science",
             semester: "5th",

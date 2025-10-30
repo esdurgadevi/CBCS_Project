@@ -61,13 +61,13 @@ const DomainDetails = () => {
         }
 
         // Fetch subject details if available
-        if (domainData.subjects && domainData.subjects.length > 0) {
-          const subjectPromises = domainData.subjects.map(subjectId =>
-            fetch(`http://localhost:5000/api/subjects/${subjectId}`).then(res => res.json())
-          );
-          const subjectsData = await Promise.all(subjectPromises);
-          setSubjects(subjectsData.filter(subject => subject && !subject.error));
-        }
+        // if (domainData.subjects && domainData.subjects.length > 0) {
+        //   const subjectPromises = domainData.subjects.map(subjectId =>
+        //     fetch(`http://localhost:5000/api/subjects/${subjectId}`).then(res => res.json())
+        //   );
+        //   const subjectsData = await Promise.all(subjectPromises);
+        //   setSubjects(subjectsData.filter(subject => subject && !subject.error));
+        // }
 
       } catch (err) {
         setError(err.message);
