@@ -24,7 +24,7 @@ const Department = () => {
 
   const fetchDepartments = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/departments');
+      const response = await fetch('https://cbcs-project.onrender.com/api/departments');
       const data = await response.json();
       setDepartments(data);
       setIsLoading(false);
@@ -36,7 +36,7 @@ const Department = () => {
 
   const fetchDepartmentDetails = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/departments/${id}`);
+      const response = await fetch(`https://cbcs-project.onrender.com/api/departments/${id}`);
       const data = await response.json();
       setSelectedDept(data);
     } catch (error) {
@@ -47,7 +47,7 @@ const Department = () => {
   const handleAddDepartment = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/departments', {
+      const response = await fetch('https://cbcs-project.onrender.com/api/departments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,7 +68,7 @@ const Department = () => {
   const handleUpdateDepartment = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:5000/api/departments/${editingDept._id}`, {
+      const response = await fetch(`https://cbcs-project.onrender.com/api/departments/${editingDept._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -92,7 +92,7 @@ const Department = () => {
   const handleDeleteDepartment = async (id) => {
     if (window.confirm('Are you sure you want to delete this department?')) {
       try {
-        const response = await fetch(`http://localhost:5000/api/departments/${id}`, {
+        const response = await fetch(`https://cbcs-project.onrender.com/api/departments/${id}`, {
           method: 'DELETE',
         });
         

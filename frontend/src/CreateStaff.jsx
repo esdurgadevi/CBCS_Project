@@ -140,7 +140,7 @@ const FileUpload = ({ onChange, file, currentImage }) => (
       >
         <p className="text-sm text-gray-600 mb-2">Current Image:</p>
         <img 
-          src={`http://localhost:5000/${currentImage}`} 
+          src={`https://cbcs-project.onrender.com/${currentImage}`} 
           alt="Current staff" 
           className="w-20 h-20 rounded-full object-cover mx-auto border-2 border-gray-300"
         />
@@ -242,7 +242,7 @@ const CreateStaff = () => {
     const fetchDepartments = async () => {
       setLoading(prev => ({ ...prev, departments: true }));
       try {
-        const res = await axios.get("http://localhost:5000/api/departments");
+        const res = await axios.get("https://cbcs-project.onrender.com/api/departments");
         setDepartments(res.data.map(d => ({ value: d.dept_id, label: d.dept_name })));
       } catch (err) {
         setMessage({ type: "error", text: "Failed to load departments" });
@@ -258,7 +258,7 @@ const CreateStaff = () => {
       if (staff.dept_id) {
         setLoading(prev => ({ ...prev, domains: true }));
         try {
-          const res = await axios.get(`http://localhost:5000/api/domains/dept/${staff.dept_id}`);
+          const res = await axios.get(`https://cbcs-project.onrender.com/api/domains/dept/${staff.dept_id}`);
           setDomains(res.data.map(d => ({ value: d.domain_id, label: d.name })));
         } catch (err) {
           setMessage({ type: "error", text: "Failed to load domains" });
@@ -294,10 +294,10 @@ const CreateStaff = () => {
 
     try {
       if (isEditMode) {
-        await axios.put(`http://localhost:5000/api/staffs/${staffData.staff_id}`, formData);
+        await axios.put(`https://cbcs-project.onrender.com/api/staffs/${staffData.staff_id}`, formData);
         setMessage({ type: "success", text: "Staff updated!" });
       } else {
-        await axios.post("http://localhost:5000/api/staffs", formData);
+        await axios.post("https://cbcs-project.onrender.com/api/staffs", formData);
         setMessage({ type: "success", text: "Staff created!" });
         setStaff({ staff_id: "", name: "", email: "", phone: "", dept_id: "", domain_id: "" });
         setImage(null);

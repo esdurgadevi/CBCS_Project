@@ -176,7 +176,7 @@ const CreateDomain = () => {
     const fetchDepartments = async () => {
       setLoading(prev => ({ ...prev, departments: true }));
       try {
-        const res = await axios.get("http://localhost:5000/api/departments");
+        const res = await axios.get("https://cbcs-project.onrender.com/api/departments");
         const departmentsData = res.data.map(dept => ({
           value: dept.dept_id,
           label: dept.dept_name
@@ -235,11 +235,11 @@ const CreateDomain = () => {
     try {
       if (isEditMode) {
         // Update existing domain
-        await axios.put(`http://localhost:5000/api/domains/${domainData._id}`, domain);
+        await axios.put(`https://cbcs-project.onrender.com/api/domains/${domainData._id}`, domain);
         setMessage({ type: "success", text: "Domain updated successfully!" });
       } else {
         // Create new domain
-        await axios.post("http://localhost:5000/api/domains", domain);
+        await axios.post("https://cbcs-project.onrender.com/api/domains", domain);
         setMessage({ type: "success", text: "Domain created successfully!" });
         
         // Reset form only for create mode

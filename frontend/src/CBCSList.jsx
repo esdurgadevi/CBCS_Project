@@ -38,8 +38,8 @@ const CBCSList = ({ department = null, cbcsType = 'core' }) => {
     try {
       setLoading(true);
       const apiUrl = activeCbcsType === 'elective' 
-        ? 'http://localhost:5000/api/elective-cbcs'
-        : 'http://localhost:5000/api/student_cbcs';
+        ? 'https://cbcs-project.onrender.com/api/elective-cbcs'
+        : 'https://cbcs-project.onrender.com/api/student_cbcs';
       
       const response = await fetch(apiUrl);
       if (!response.ok) {

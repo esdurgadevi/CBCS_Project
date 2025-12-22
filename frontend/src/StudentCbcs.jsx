@@ -22,7 +22,7 @@ const StudentCbcs = () => {
   const fetchStudentInfo = async () => {
     try {
       setStudentLoading(true);
-      const response = await fetch(`http://localhost:5000/api/otp/student/${regno}`);
+      const response = await fetch(`https://cbcs-project.onrender.com/api/otp/student/${regno}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch student data: ${response.status}`);
       }
@@ -46,8 +46,8 @@ const StudentCbcs = () => {
       console.log(id);
       const apiUrl = 
            type === 'elective'
-           ? `http://localhost:5000/api/elective-cbcs/${id}`
-           : `http://localhost:5000/api/student_cbcs/${id}`
+           ? `https://cbcs-project.onrender.com/api/elective-cbcs/${id}`
+           : `https://cbcs-project.onrender.com/api/student_cbcs/${id}`
       setLoading(true);
       const response = await fetch(apiUrl);
       
@@ -120,8 +120,8 @@ const StudentCbcs = () => {
       //console.log(regno+" "+name+" "+email);
       const apiUrl1 = 
            type === 'elective'
-           ? `http://localhost:5000/api/elective-cbcs/stu/${id}`
-           : `http://localhost:5000/api/student_cbcs/stu/${id}`
+           ? `https://cbcs-project.onrender.com/api/elective-cbcs/stu/${id}`
+           : `https://cbcs-project.onrender.com/api/student_cbcs/stu/${id}`
       
       const res = await fetch(apiUrl1, {
         method: "POST",

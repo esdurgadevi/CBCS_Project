@@ -269,8 +269,8 @@ const CbcsDetails = () => {
         setLoading(true);
         
         const baseUrl = isElective 
-          ? 'http://localhost:5000/api/elective-cbcs'
-          : 'http://localhost:5000/api/student_cbcs';
+          ? 'https://cbcs-project.onrender.com/api/elective-cbcs'
+          : 'https://cbcs-project.onrender.com/api/student_cbcs';
         
         const response = await axios.get(`${baseUrl}/${id}`);
         
@@ -296,8 +296,8 @@ const CbcsDetails = () => {
       setLoadingPending(true);
       
       const baseUrl = isElective 
-        ? 'http://localhost:5000/api/elective-cbcs'
-        : 'http://localhost:5000/api/student_cbcs';
+        ? 'https://cbcs-project.onrender.com/api/elective-cbcs'
+        : 'https://cbcs-project.onrender.com/api/student_cbcs';
       
       const response = await axios.get(
         `${baseUrl}/${id}/pending?format=json`
@@ -321,8 +321,8 @@ const CbcsDetails = () => {
   const downloadPendingStudentsExcel = async () => {
     try {
       const baseUrl = isElective 
-        ? 'http://localhost:5000/api/elective-cbcs'
-        : 'http://localhost:5000/api/student_cbcs';
+        ? 'https://cbcs-project.onrender.com/api/elective-cbcs'
+        : 'https://cbcs-project.onrender.com/api/student_cbcs';
       
       const response = await axios.get(
         `${baseUrl}/${id}/pending?format=excel`,
@@ -348,8 +348,8 @@ const CbcsDetails = () => {
     try {
       setUpdatingStatus(true);
       const baseUrl = isElective 
-        ? 'http://localhost:5000/api/elective-cbcs'
-        : 'http://localhost:5000/api/student_cbcs';
+        ? 'https://cbcs-project.onrender.com/api/elective-cbcs'
+        : 'https://cbcs-project.onrender.com/api/student_cbcs';
       
       const response = await axios.put(`${baseUrl}/${id}/updateCbcs`, {
         enabled: enabled
@@ -376,8 +376,8 @@ const CbcsDetails = () => {
     try {
       setUpdatingStatus(true);
       const baseUrl = isElective 
-        ? 'http://localhost:5000/api/elective-cbcs'
-        : 'http://localhost:5000/api/student_cbcs';
+        ? 'https://cbcs-project.onrender.com/api/elective-cbcs'
+        : 'https://cbcs-project.onrender.com/api/student_cbcs';
       
       const response = await axios.put(`${baseUrl}/${id}/updateFeedback`, {
         enabled: enabled

@@ -42,18 +42,18 @@ const StaffList = () => {
       // Both department and domain are provided
       const deptId = departmentFromProps.dept_id || departmentFromProps.id || departmentFromProps;
       const domainId = domainFromProps.domain_id || domainFromProps.id || domainFromProps;
-      return `http://localhost:5000/api/filter/${deptId}/${domainId}`;
+      return `https://cbcs-project.onrender.com/api/filter/${deptId}/${domainId}`;
     } else if (departmentFromProps) {
       // Only department is provided
       const deptId = departmentFromProps.dept_id || departmentFromProps.id || departmentFromProps;
-      return `http://localhost:5000/api/staffs/department/${deptId}`;
+      return `https://cbcs-project.onrender.com/api/staffs/department/${deptId}`;
     } else if (domainFromProps) {
       // Only domain is provided
       const domainId = domainFromProps.domain_id || domainFromProps.id || domainFromProps;
-      return `http://localhost:5000/api/staffs/domain/${domainId}`;
+      return `https://cbcs-project.onrender.com/api/staffs/domain/${domainId}`;
     } else {
       // No props, get all staff
-      return 'http://localhost:5000/api/staffs/';
+      return 'https://cbcs-project.onrender.com/api/staffs/';
     }
   };
 
@@ -74,9 +74,9 @@ const StaffList = () => {
         
         // Only fetch all departments and domains if we're not in filtered mode
         if (!departmentFromProps && !domainFromProps) {
-          const res1 = await fetch(`http://localhost:5000/api/departments`);
+          const res1 = await fetch(`https://cbcs-project.onrender.com/api/departments`);
           const d1 = await res1.json();
-          const res2 = await fetch(`http://localhost:5000/api/domains`);
+          const res2 = await fetch(`https://cbcs-project.onrender.com/api/domains`);
           const d2 = await res2.json();
           
           const depts = d1.map(dept => ({
@@ -473,7 +473,7 @@ const StaffList = () => {
                       {/* Avatar */}
                       <div className="relative">
                          <img 
-                            src={`http://localhost:5000/${staff.image}`} 
+                            src={`https://cbcs-project.onrender.com/${staff.image}`} 
                             alt={staff.name}
                             className="w-16 h-16 rounded-2xl object-cover border-2 border-white shadow-lg"
                           />

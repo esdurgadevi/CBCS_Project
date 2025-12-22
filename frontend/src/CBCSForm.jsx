@@ -28,7 +28,7 @@ const CBCSForm = () => {
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/departments/");
+        const res = await fetch("https://cbcs-project.onrender.com/api/departments/");
         if (!res.ok) throw new Error("Failed to fetch departments");
         const data = await res.json();
         setDepartments(data);
@@ -47,7 +47,7 @@ const CBCSForm = () => {
       if (!formData.departmentId) return;
       try {
         const res = await fetch(
-          `http://localhost:5000/api/staffs/department/${formData.departmentId}`
+          `https://cbcs-project.onrender.com/api/staffs/department/${formData.departmentId}`
         );
         if (!res.ok) throw new Error("Failed to fetch staffs");
         const data = await res.json();
@@ -109,7 +109,7 @@ const CBCSForm = () => {
     if (!formData.departmentId || !formData.semester) return;
     try {
       const res = await fetch(
-        `http://localhost:5000/api/coresubjects/${formData.departmentId}/${formData.semester}`
+        `https://cbcs-project.onrender.com/api/coresubjects/${formData.departmentId}/${formData.semester}`
       );
       if (!res.ok) throw new Error("Failed to fetch subjects");
       const data = await res.json();
@@ -252,7 +252,7 @@ const CBCSForm = () => {
       formDataObj.append("data",JSON.stringify(payload));
       if(studentExcelFile) formDataObj.append("student_excel",studentExcelFile);
 
-      const res = await fetch("http://localhost:5000/api/student_cbcs", {
+      const res = await fetch("https://cbcs-project.onrender.com/api/student_cbcs", {
         method: "POST",
         //headers: { "Content-Type": "application/json" },
         body: formDataObj,

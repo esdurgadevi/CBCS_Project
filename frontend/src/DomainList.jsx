@@ -46,7 +46,7 @@ const DomainList = () => {
           : deptFromProps.dept_id || deptFromProps.id || deptFromProps;
 
         // Fetch department details
-        const deptResponse = await fetch(`http://localhost:5000/api/departments/${deptId}`);
+        const deptResponse = await fetch(`https://cbcs-project.onrender.com/api/departments/${deptId}`);
         if (!deptResponse.ok) {
           throw new Error('Failed to fetch department details');
         }
@@ -54,7 +54,7 @@ const DomainList = () => {
         setDepartment(deptData);
 
         // Fetch domains for the department
-        const domainsResponse = await fetch(`http://localhost:5000/api/domains/dept/${deptId}`);
+        const domainsResponse = await fetch(`https://cbcs-project.onrender.com/api/domains/dept/${deptId}`);
         if (!domainsResponse.ok) {
           throw new Error('Failed to fetch domains');
         }

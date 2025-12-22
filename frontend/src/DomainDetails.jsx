@@ -33,7 +33,7 @@ const DomainDetails = () => {
     const fetchDomainDetails = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/api/domains/${domain_id}`);
+        const response = await fetch(`https://cbcs-project.onrender.com/api/domains/${domain_id}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch domain details');
@@ -44,7 +44,7 @@ const DomainDetails = () => {
 
         // Fetch department details
         if (domainData.dept_id) {
-          const deptResponse = await fetch(`http://localhost:5000/api/departments/${domainData.dept_id}`);
+          const deptResponse = await fetch(`https://cbcs-project.onrender.com/api/departments/${domainData.dept_id}`);
           if (deptResponse.ok) {
             const deptData = await deptResponse.json();
             setDepartment(deptData);
@@ -54,7 +54,7 @@ const DomainDetails = () => {
         // Fetch staff details
         if (domainData.staffs && domainData.staffs.length > 0) {
           const staffPromises = domainData.staffs.map(staffId => 
-            fetch(`http://localhost:5000/api/staffs/${staffId}`).then(res => res.json())
+            fetch(`https://cbcs-project.onrender.com/api/staffs/${staffId}`).then(res => res.json())
           );
           const staffsData = await Promise.all(staffPromises);
           setStaffs(staffsData.filter(staff => staff && !staff.error));
@@ -85,7 +85,7 @@ const DomainDetails = () => {
   const handleDeleteDomain = async () => {
     try {
       setDeleteLoading(true);
-      const response = await fetch(`http://localhost:5000/api/domains/${domain._id}`, {
+      const response = await fetch(`https://cbcs-project.onrender.com/api/domains/${domain._id}`, {
         method: 'DELETE',
       });
 

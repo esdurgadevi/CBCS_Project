@@ -33,7 +33,7 @@ const StudentLogin = () => {
     console.log(formData.regno);
     
     try {
-      const response = await fetch('http://localhost:5000/api/otp/send-otp', {
+      const response = await fetch('https://cbcs-project.onrender.com/api/otp/send-otp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ const StudentLogin = () => {
     e.preventDefault();
     const enteredOtp = otp.join('');
     try{
-       const response = await fetch('http://localhost:5000/api/otp/verify-otp', {
+       const response = await fetch('https://cbcs-project.onrender.com/api/otp/verify-otp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

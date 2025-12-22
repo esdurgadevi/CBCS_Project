@@ -36,7 +36,7 @@ const ResetPassword = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/admin/reset-password-email", {
+      const response = await fetch("https://cbcs-project.onrender.com/api/admin/reset-password-email", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

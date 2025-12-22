@@ -27,10 +27,10 @@ const AdminDashboard = () => {
     const fetchData = async () => {
       try {
         const [deptRes, coreRes, electiveRes, staffRes] = await Promise.all([
-          fetch('http://localhost:5000/api/departments').then(res => res.json()),
-          fetch('http://localhost:5000/api/coresubjects').then(res => res.json()),
-          fetch('http://localhost:5000/api/electives').then(res => res.json()),
-          fetch('http://localhost:5000/api/staffs').then(res => res.json()),
+          fetch('https://cbcs-project.onrender.com/api/departments').then(res => res.json()),
+          fetch('https://cbcs-project.onrender.com/api/coresubjects').then(res => res.json()),
+          fetch('https://cbcs-project.onrender.com/api/electives').then(res => res.json()),
+          fetch('https://cbcs-project.onrender.com/api/staffs').then(res => res.json()),
         ]);
 
         setStats({
@@ -79,7 +79,7 @@ const AdminDashboard = () => {
                   { id: 'elective', name: 'Elective CBCS', icon: FiBookOpen },
                   { id: 'departments', name: 'Departments', icon: FiUsers },
                   { id: 'cbcs-list', name: 'CBCS List', icon: FiBook },
-                  { id: 'results', name: 'View Results', icon: FiBarChart2 },
+                  // { id: 'results', name: 'View Results', icon: FiBarChart2 },
                   { id: 'staffs', name: 'Staffs', icon: FiUsers },
                 ].map((item) => (
                   <li key={item.id}>

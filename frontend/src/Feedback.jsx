@@ -21,9 +21,9 @@ const Feedback = () => {
     try {
       let apiUrl;
       if (type === 'elective') {
-        apiUrl = `http://localhost:5000/api/elective-cbcs/${id}`;
+        apiUrl = `https://cbcs-project.onrender.com/api/elective-cbcs/${id}`;
       } else {
-        apiUrl = `http://localhost:5000/api/student_cbcs/${id}`;
+        apiUrl = `https://cbcs-project.onrender.com/api/student_cbcs/${id}`;
       }
       setLoading(true);
       const response = await fetch(apiUrl);
@@ -135,9 +135,9 @@ const Feedback = () => {
       };
       let apiUrl1;
       if (type === 'elective') {
-        apiUrl1 = `http://localhost:5000/api/elective-cbcs/${id}/${regno}/submit-feedback`;
+        apiUrl1 = `https://cbcs-project.onrender.com/api/elective-cbcs/${id}/${regno}/submit-feedback`;
       } else {
-        apiUrl1 = `http://localhost:5000/api/student_cbcs/${id}/${regno}/submit-feedback`;
+        apiUrl1 = `https://cbcs-project.onrender.com/api/student_cbcs/${id}/${regno}/submit-feedback`;
       }
       const response = await fetch(
         apiUrl1,

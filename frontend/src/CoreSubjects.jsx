@@ -116,7 +116,7 @@ const CoreSubjects = () => {
   const fetchSubjects = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/coresubjects/');
+      const response = await fetch('https://cbcs-project.onrender.com/api/coresubjects/');
       const data = await response.json();
       setSubjects(data);
       setFilteredSubjects(data);
@@ -146,7 +146,7 @@ const CoreSubjects = () => {
       let response;
       if (editingSubject) {
         // Update existing subject
-        response = await fetch(`http://localhost:5000/api/coresubjects/${editingSubject.subject_id}`, {
+        response = await fetch(`https://cbcs-project.onrender.com/api/coresubjects/${editingSubject.subject_id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -155,7 +155,7 @@ const CoreSubjects = () => {
         });
       } else {
         // Create new subject
-        response = await fetch('http://localhost:5000/api/coresubjects/', {
+        response = await fetch('https://cbcs-project.onrender.com/api/coresubjects/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -189,7 +189,7 @@ const CoreSubjects = () => {
    console.log(subject.subject_id);
   try {
     // ✅ Fetch latest subject data from API before editing
-    const response = await fetch(`http://localhost:5000/api/coresubjects/${subject.subject_id}`);
+    const response = await fetch(`https://cbcs-project.onrender.com/api/coresubjects/${subject.subject_id}`);
     if (!response.ok) {
       console.error("Failed to fetch subject details for edit");
       return;
@@ -216,7 +216,7 @@ const CoreSubjects = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this subject?')) {
       try {
-        const response = await fetch(`http://localhost:5000/api/coresubjects/${id}`, {
+        const response = await fetch(`https://cbcs-project.onrender.com/api/coresubjects/${id}`, {
           method: 'DELETE',
         });
         

@@ -22,7 +22,7 @@ const DepartmentList = () => {
   const fetchDepartments = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/departments/');
+      const response = await fetch('https://cbcs-project.onrender.com/api/departments/');
       if (!response.ok) throw new Error('Failed to fetch departments');
       
       const data = await response.json();
@@ -46,8 +46,8 @@ const DepartmentList = () => {
     e.preventDefault();
     try {
       const url = editingDepartment 
-        ? `http://localhost:5000/api/departments/${editingDepartment.dept_id}`
-        : 'http://localhost:5000/api/departments/';
+        ? `https://cbcs-project.onrender.com/api/departments/${editingDepartment.dept_id}`
+        : 'https://cbcs-project.onrender.com/api/departments/';
       
       const method = editingDepartment ? 'PUT' : 'POST';
       const response = await fetch(url, {
@@ -85,7 +85,7 @@ const DepartmentList = () => {
   const handleDelete = async (deptId) => {
     if (!window.confirm('Are you sure you want to delete this department?')) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/departments/${deptId}`, { method: 'DELETE' });
+      const response = await fetch(`https://cbcs-project.onrender.com/api/departments/${deptId}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Failed to delete department');
       setDepartments(departments.filter(dept => dept.dept_id !== deptId));
     } catch (error) {

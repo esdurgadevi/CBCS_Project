@@ -29,7 +29,7 @@ const StaffDetails = () => {
     const fetchStaff = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/api/staffs/${staffId}`);
+        const response = await fetch(`https://cbcs-project.onrender.com/api/staffs/${staffId}`);
 
         if (!response.ok) {
           throw new Error('Failed to fetch staff details');
@@ -61,8 +61,8 @@ const StaffDetails = () => {
     const fetchdept = async () => {
       try {
         if (staff) {
-          const res1 = await fetch(`http://localhost:5000/api/departments/${staff.dept_id}`);
-          const res2 = await fetch(`http://localhost:5000/api/domains/${staff.domain_id}`);
+          const res1 = await fetch(`https://cbcs-project.onrender.com/api/departments/${staff.dept_id}`);
+          const res2 = await fetch(`https://cbcs-project.onrender.com/api/domains/${staff.domain_id}`);
           const d1 = await res1.json();
           const d2 = await res2.json();
           setDept(d1.dept_name);
@@ -79,7 +79,7 @@ const StaffDetails = () => {
   const handleDeleteStaff = async () => {
     try {
       setDeleteLoading(true);
-      const response = await fetch(`http://localhost:5000/api/staffs/${staffId}`, {
+      const response = await fetch(`https://cbcs-project.onrender.com/api/staffs/${staffId}`, {
         method: 'DELETE',
       });
 
@@ -268,7 +268,7 @@ const StaffDetails = () => {
                   className="h-64 lg:h-full"
                 >
                   <img
-                    src={`http://localhost:5000/${staff.image}`}
+                    src={`https://cbcs-project.onrender.com/${staff.image}`}
                     alt={staff.name}
                     className="w-full h-full object-cover"
                     onError={() => setImageError(true)}

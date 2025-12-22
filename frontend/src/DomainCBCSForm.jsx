@@ -30,7 +30,7 @@ const DomainCBCSForm = () => {
   useEffect(() => {
     const fetchDomains = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/domains");
+        const res = await fetch("https://cbcs-project.onrender.com/api/domains");
         if (!res.ok) throw new Error("Failed to fetch domains");
         const data = await res.json();
         setDomains(data);
@@ -46,7 +46,7 @@ const DomainCBCSForm = () => {
   // Helper: Fetch staff name from staff endpoint
   const fetchStaffName = async (staffId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/staffs/${staffId}`);
+      const res = await fetch(`https://cbcs-project.onrender.com/api/staffs/${staffId}`);
       if (!res.ok) throw new Error(`Failed to fetch staff ${staffId}`);
       const data = await res.json();
       return data.name || "Unknown Staff";
@@ -64,7 +64,7 @@ const DomainCBCSForm = () => {
       setIsLoadingStaffs(true);
       try {
         const res = await fetch(
-          `http://localhost:5000/api/domains/${formData.domainId}/staffs`
+          `https://cbcs-project.onrender.com/api/domains/${formData.domainId}/staffs`
         );
         if (!res.ok) throw new Error("Failed to fetch staffs");
         const staffIds = await res.json();
@@ -95,7 +95,7 @@ const DomainCBCSForm = () => {
   // Helper: Fetch subject name from electives endpoint
   const fetchSubjectName = async (subjectId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/electives/${subjectId}`);
+      const res = await fetch(`https://cbcs-project.onrender.com/api/electives/${subjectId}`);
       if (!res.ok) throw new Error(`Failed to fetch subject ${subjectId}`);
       const data = await res.json();
       return data.name || "Unknown Subject";
@@ -165,7 +165,7 @@ const DomainCBCSForm = () => {
     try {
       // First, fetch the subject IDs from the domain
       const res = await fetch(
-        `http://localhost:5000/api/domains/${formData.domainId}/subjects`
+        `https://cbcs-project.onrender.com/api/domains/${formData.domainId}/subjects`
       );
       
       if (!res.ok) throw new Error("Failed to fetch subject IDs");
@@ -206,7 +206,7 @@ const DomainCBCSForm = () => {
         try {
           // Fetch subject IDs from domain
           const res = await fetch(
-            `http://localhost:5000/api/domains/${formData.domainId}/subjects`
+            `https://cbcs-project.onrender.com/api/domains/${formData.domainId}/subjects`
           );
           
           if (!res.ok) throw new Error("Failed to fetch subject IDs");
@@ -377,7 +377,7 @@ const DomainCBCSForm = () => {
     if (studentExcelFile) formDataObj.append("student_excel", studentExcelFile);
 
     // ✅ Correct API route
-    const res = await fetch("http://localhost:5000/api/elective-cbcs", {
+    const res = await fetch("https://cbcs-project.onrender.com/api/elective-cbcs", {
       method: "POST",
       body: formDataObj,
     });

@@ -36,7 +36,7 @@ const DepartmentDetails = () => {
     const fetchDepartmentDetails = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/api/departments/${dept_id}`);
+        const response = await fetch(`https://cbcs-project.onrender.com/api/departments/${dept_id}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch department details');
@@ -47,10 +47,10 @@ const DepartmentDetails = () => {
 
         // Fetch additional statistics (you might want to create specific APIs for these)
         // For now, we'll use mock data - replace with actual API calls
-        const staffResponse = await fetch(`http://localhost:5000/api/staffs/department/${dept_id}`);
+        const staffResponse = await fetch(`https://cbcs-project.onrender.com/api/staffs/department/${dept_id}`);
         const staffData = await staffResponse.json();
         
-        const domainsResponse = await fetch(`http://localhost:5000/api/domains/dept/${dept_id}`);
+        const domainsResponse = await fetch(`https://cbcs-project.onrender.com/api/domains/dept/${dept_id}`);
         const domainsData = await domainsResponse.json();
 
         setStats({
